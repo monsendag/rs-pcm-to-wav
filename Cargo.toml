@@ -1,0 +1,9 @@
+[package]
+authors = ["Dag Einar Monsen <me@dag.im>"]
+edition = "2018"
+name = "raw-to-wav"
+version = "0.1.0"
+
+[dependencies]
+byteorder = "1.2.6"
+hound = "3.4.0"
