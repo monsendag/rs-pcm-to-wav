@@ -13,6 +13,13 @@ use hound::WavWriter;
 
 use byteorder::{LittleEndian, ReadBytesExt};
 
+/**
+ * pass a list of files as arguments
+ *
+ * this program will iterate through all files
+ * and add PCM wav headers, so the file can be
+ * opened by a audio players
+ */
 fn main() {
     let args: Vec<String> = env::args().collect();
 
