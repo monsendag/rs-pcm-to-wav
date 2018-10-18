@@ -2,7 +2,6 @@ extern crate byteorder;
 extern crate hound;
 
 use std::env;
-use std::f32::consts::PI;
 use std::fs::File;
 use std::i16;
 use std::io;
@@ -12,28 +11,26 @@ use std::io::Cursor;
 use hound::WavSpec;
 use hound::WavWriter;
 
-use byteorder::{BigEndian, LittleEndian, ReadBytesExt, WriteBytesExt};
+use byteorder::{LittleEndian, ReadBytesExt};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
 
-    for filename in &args[1..] {
-        save(filename);
+    // ignore first argument (name of binary)
+    let args = &args[1..];
+
+    for filename in args {
+        match save(filename) {
+            Ok(wav_name) => println!("saved filename as {}", wav_name),
+            Err(_) => println!("failed to convert {} to wav file", filename),
+        }
     }
 }
 
 /**
-*
-* 00000010
-* 00000101
-
-* 00000010
-* 00010101
-
+ * save as wav file, return new file name
 */
-
-fn save(filename: &str) -> Result<(), io::Error> {
-    println!("save: {}", filename);
+fn save(filename: &str) -> Result<String, io::Error> {
     let spec = WavSpec {
         channels: 1,
         sample_rate: 44100,
@@ -44,7 +41,6 @@ fn save(filename: &str) -> Result<(), io::Error> {
     let mut f = File::open(filename)?;
     let mut buffer = Vec::new();
 
-    // read the whole file
     f.read_to_end(&mut buffer)?;
 
     let mut rdr = Cursor::new(&buffer);
@@ -52,16 +48,16 @@ fn save(filename: &str) -> Result<(), io::Error> {
     let mut value: Result<i16, io::Error>;
 
     let wav_name = format!("{}.wav", filename);
-    let mut writer = WavWriter::create(wav_name, spec).unwrap();
+    let mut writer = WavWriter::create(&wav_name, spec).unwrap();
 
     loop {
         value = rdr.read_i16::<LittleEndian>();
 
-        match (value) {
+        match value {
             Ok(x) => writer.write_sample(x).unwrap(),
             Err(_) => break,
         }
     }
 
-    Ok(())
+    Ok(wav_name)
 }
